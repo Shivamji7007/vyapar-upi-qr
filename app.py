@@ -9,7 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# Custom High-Trust POS Styling
+# Custom High-Trust POS Styling with Button Fixes
 st.markdown("""
 <style>
     .pos-card {
@@ -29,12 +29,12 @@ st.markdown("""
         font-size: 13px;
         color: #64748b;
     }
-    .cart-box {
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
+    /* Clean, non-wrapping POS button styling */
+    div.stButton > button {
+        white-space: nowrap !important;
+        font-weight: 600;
+        padding: 10px 14px;
         border-radius: 8px;
-        padding: 12px;
-        margin-top: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -66,31 +66,32 @@ with st.sidebar:
 # Layout: Left side POS Item Tapper, Right side Live Dynamic QR & Bill
 col_pos, col_qr = st.columns([1.1, 1], gap="large")
 
-# Common Indian daily retail presets
+# Common Indian daily retail presets (Clean Short Names)
 PRESET_ITEMS = [
-    {"name": "Chai ☕", "price": 10.0},
-    {"name": "Special Tea ☕", "price": 15.0},
-    {"name": "Samosa 🥟", "price": 15.0},
-    {"name": "Bread Pakora 🥪", "price": 20.0},
-    {"name": "Water Bottle 💧", "price": 20.0},
-    {"name": "Cold Drink (Can) 🥤", "price": 40.0},
-    {"name": "Chips / Namkeen 🥨", "price": 20.0},
-    {"name": "Sweet / Mithai 🍬", "price": 30.0},
-    {"name": "Coffee 🍵", "price": 25.0},
+    {"name": "☕ Chai", "price": 10.0},
+    {"name": "☕ Spl Tea", "price": 15.0},
+    {"name": "🥟 Samosa", "price": 15.0},
+    {"name": "🥪 Bread Pakora", "price": 20.0},
+    {"name": "💧 Water Bottle", "price": 20.0},
+    {"name": "🥤 Cold Drink", "price": 40.0},
+    {"name": "🥨 Chips", "price": 20.0},
+    {"name": "🍬 Sweet", "price": 30.0},
+    {"name": "🍵 Coffee", "price": 25.0},
 ]
 
 with col_pos:
     st.subheader("🛍️ 1. Quick Item Tap (POS)")
-    st.caption("Tap items to instantly add them to customer bill")
+    st.caption("Tap any item to add directly to current bill")
 
-    # Display items in a responsive grid
-    for i in range(0, len(PRESET_ITEMS), 3):
-        cols = st.columns(3)
-        for j in range(3):
+    # Display items in a clean 2-column wide grid so text never truncates
+    for i in range(0, len(PRESET_ITEMS), 2):
+        cols = st.columns(2)
+        for j in range(2):
             if i + j < len(PRESET_ITEMS):
                 item = PRESET_ITEMS[i + j]
                 with cols[j]:
-                    if st.button(f"{item['name']}\n₹{int(item['price'])}", key=f"btn_{item['name']}", use_container_width=True):
+                    button_label = f"{item['name']}  ·  ₹{int(item['price'])}"
+                    if st.button(button_label, key=f"btn_{item['name']}", use_container_width=True):
                         add_to_cart(item['name'], item['price'])
                         st.rerun()
 
@@ -109,7 +110,7 @@ with col_pos:
 # Calculate Total
 total_bill = sum(data["price"] * data["qty"] for data in st.session_state.cart.values())
 if total_bill == 0.0:
-    total_bill = 10.0 # Default starting fallback if cart empty
+    total_bill = 10.0
 
 with col_qr:
     st.subheader("⚡ 2. Instant Locked QR")
